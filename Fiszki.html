@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wyszukiwanie słówek</title>
+    <body style="background-color: red;">
+    <style>
+         body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: red; /* Kolor tła strony */
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 16px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        select, input {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #wordBox {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        #result {
+            font-size: 18px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .red {
+            color: red;
+        }
+        .green {
+            color: green;
+        }
+        .correctAnswers {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .correctAnswers table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .correctAnswers th, .correctAnswers td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .correctAnswers th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Wyszukiwanie słówek</h1>
+        <div>
+            <label for="levelSelect">Wybierz poziom:</label>
+            <select id="levelSelect">
+                <option value="">-- Wybierz poziom --</option>
+                <option value="easy">Łatwy</option>
+                <option value="medium">Średni</option>
+                <option value="hard">Trudny</option>
+            </select>
+        </div>
+        <div>
+            <label for="daySelect">Wybierz lekcję:</label>
+            <select id="daySelect" disabled>
+                <option value="">-- Wybierz lekcję --</option>
+            </select>
+        </div>
+        <div id="wordBox">Wybierz poziom i lekcję</div>
+        <input type="text" id="userInput" placeholder="Wpisz tłumaczenie...">
+        <button id="checkBtn">Sprawdź</button>
+        <button id="dontKnowBtn">Nie wiem</button>
+        <div id="result"></div>
+        <div class="correctAnswers">
+            <h2>Odgadnięte słówka:</h2>
+            <table id="correctAnswersList">
+                <thead>
+                    <tr>
+                        <th>Angielskie</th>
+                        <th>Polskie</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const flashcards = {
+            easy: [
+                {english: "apple", polish: "jabłko"},
+                {english: "book", polish: "książka"},
+                {english: "cat", polish: "kot"},
+                {english: "dog", polish: "pies"},
+                {english: "egg", polish: "jajko"},
+                {english: "fish", polish: "ryba"},
+                {english: "green", polish: "zielony"},
+                {english: "house", polish: "dom"},
+                {english: "ice", polish: "lód"},
+                {english: "jump", polish: "skakać"},
+                {english: "key", polish: "klucz"},
+                {english: "lamp", polish: "lampa"},
+                {english: "moon", polish: "księżyc"},
+                {english: "name", polish: "imię"},
+                {english: "orange", polish: "pomarańcza"},
+                {english: "pen", polish: "długopis"},
+                {english: "quilt", polish: "kołdra"},
+                {english: "rain", polish: "deszcz"},
+                {english: "sun", polish: "słońce"},
+                {english: "tree", polish: "drzewo"},
+                {english: "umbrella", polish: "parasol"},
+                {english: "vase", polish: "wazon"},
+                {english: "water", polish: "woda"},
+                {english: "x-ray", polish: "rentgen"},
+                {english: "yellow", polish: "żółty"},
+                {english: "zebra", polish: "zebra"},
+                {english: "car", polish: "samochód"},
+                {english: "chair", polish: "krzesło"},
+                {english: "desk", polish: "biurko"},
+                {english: "door", polish: "drzwi"},
+                {english: "floor", polish: "podłoga"},
+                {english: "friend", polish: "przyjaciel"},
+                {english: "game", polish: "gra"},
+                {english: "hand", polish: "ręka"},
+                {english: "hill", polish: "wzgórze"},
+                {english: "light", polish: "światło"},
+                {english: "milk", polish: "mleko"},
+                {english: "nose", polish: "nos"},
+                {english: "park", polish: "park"},
+                {english: "river", polish: "rzeka"},
+                {english: "sand", polish: "piasek"},
+                {english: "shoe", polish: "but"},
+                {english: "star", polish: "gwiazda"},
+                {english: "toy", polish: "zabawka"},
+                {english: "wall", polish: "ściana"},
+                {english: "yard", polish: "podwórko"},
+                {english: "zoo", polish: "zoo"},
+                {english: "boat", polish: "łódź"},
+                {english: "bread", polish: "chleb"},
+                {english: "cloud", polish: "chmura"},
+                {english: "duck", polish: "kaczka"},
+                {english: "ear", polish: "ucho"},
+                {english: "fire", polish: "ognisko"},
+                {english: "grass", polish: "trawa"},
+                {english: "hill", polish: "wzgórze"},
+                {english: "ice-cream", polish: "lody"},
+                {english: "jacket", polish: "kurtka"},
+                {english: "king", polish: "król"},
+                {english: "leaf", polish: "liść"},
+                {english: "mouse", polish: "mysz"},
+                {english: "nest", polish: "gniazdo"},
+                {english: "orange", polish: "pomarańcza"},
+                {english: "pen", polish: "długopis"},
+                {english: "quilt", polish: "kołdra"},
+                {english: "rope", polish: "sznurek"},
+                {english: "sunflower", polish: "słonecznik"},
+                {english: "treehouse", polish: "domek na drzewie"},
+                {english: "uniform", polish: "mundur"},
+                {english: "vase", polish: "wazon"},
+                {english: "window", polish: "okno"},
+                {english: "xylophone", polish: "ksylofon"},
+                {english: "yogurt", polish: "jogurt"},
+                {english: "zip", polish: "zamek błyskawiczny"},
+                {english: "actor", polish: "aktor"},
+                {english: "beach", polish: "plaża"},
+                {english: "clock", polish: "zegar"},
+                {english: "dance", polish: "taniec"},
+                {english: "eggplant", polish: "bakłażan"},
+                {english: "fish", polish: "ryba"},
+                {english: "guitar", polish: "gitara"},
+                {english: "helmet", polish: "hełm"},
+                {english: "island", polish: "wyspa"},
+                {english: "jelly", polish: "galaretka"},
+                {english: "kite", polish: "latawiec"},
+                {english: "ladder", polish: "drabina"},
+                {english: "magnet", polish: "magnes"},
+                {english: "note", polish: "nutka"},
+                {english: "owl", polish: "sowa"},
+                {english: "paper", polish: "papier"},
+                {english: "quilt", polish: "kołdra"},
+                {english: "ring", polish: "pierścionek"},
+                {english: "school", polish: "szkoła"},
+                {english: "tent", polish: "namiot"},
+                {english: "umbrella", polish: "parasol"},
+                {english: "van", polish: "furgonetka"},
+                {english: "wolf", polish: "wilk"},
+                {english: "xylophone", polish: "ksylofon"},
+                {english: "yarn", polish: "włóczka"},
+                {english: "zebra", polish: "zebra"},
+                {english: "carrot", polish: "marchewka"}
+            ],
+            medium: [
+                {english: "achieve", polish: "osiągnąć"},
+                {english: "benefit", polish: "korzyść"},
+                {english: "create", polish: "tworzyć"},
+                {english: "design", polish: "projektować"},
+                {english: "efficient", polish: "wydajny"},
+                {english: "family", polish: "rodzina"},
+                {english: "gather", polish: "zbierać"},
+                {english: "honest", polish: "uczciwy"},
+                {english: "interest", polish: "zainteresowanie"},
+                {english: "journey", polish: "podróż"},
+                {english: "knowledge", polish: "wiedza"},
+                {english: "leader", polish: "lider"},
+                {english: "manage", polish: "zarządzać"},
+                {english: "natural", polish: "naturalny"},
+                {english: "office", polish: "biuro"},
+                {english: "peaceful", polish: "spokojny"},
+                {english: "quality", polish: "jakość"},
+                {english: "respect", polish: "szacunek"},
+                {english: "success", polish: "sukces"},
+                {english: "travel", polish: "podróżować"},
+                {english: "useful", polish: "przydatny"},
+                {english: "victory", polish: "zwycięstwo"},
+                {english: "warmth", polish: "ciepło"},
+                {english: "youthful", polish: "młodzieńczy"},
+                {english: "ability", polish: "zdolność"},
+                {english: "bright", polish: "jasny"},
+                {english: "capture", polish: "uchwycić"},
+                {english: "danger", polish: "niebezpieczeństwo"},
+                {english: "effort", polish: "wysiłek"},
+                {english: "fortune", polish: "fortuna"},
+                {english: "grateful", polish: "wdzięczny"},
+                {english: "helpful", polish: "pomocny"},
+                {english: "imagine", polish: "wyobrazić"},
+                {english: "justice", polish: "sprawiedliwość"},
+                {english: "kindness", polish: "życzliwość"},
+                {english: "listen", polish: "słuchać"},
+                {english: "medical", polish: "medyczny"},
+                {english: "nervous", polish: "zdenerwowany"},
+                {english: "obvious", polish: "oczywisty"},
+                {english: "positive", polish: "pozytywny"},
+                {english: "reduce", polish: "zmniejszać"},
+                {english: "safety", polish: "bezpieczeństwo"},
+                {english: "tactic", polish: "taktyka"},
+                {english: "unusual", polish: "nietypowy"},
+                {english: "valuable", polish: "cenny"},
+                {english: "wonder", polish: "zastanawiać się"},
+                {english: "xylophone", polish: "ksylofon"},
+                {english: "zealous", polish: "gorliwy"},
+                {english: "author", polish: "autor"},
+                {english: "balance", polish: "równowaga"},
+                {english: "comfort", polish: "wygoda"},
+                {english: "decline", polish: "spadek"},
+                {english: "elaborate", polish: "opracować"},
+                {english: "familiar", polish: "znany"},
+                {english: "gloomy", polish: "ponury"},
+                {english: "hinder", polish: "utrudniać"},
+                {english: "improve", polish: "poprawiać"},
+                {english: "leisure", polish: "wypoczynek"},
+                {english: "minor", polish: "mniejszy"},
+                {english: "neglect", polish: "zaniedbać"},
+                {english: "observe", polish: "obserwować"},
+                {english: "process", polish: "proces"},
+                {english: "rigid", polish: "sztywny"},
+                {english: "symbol", polish: "symbol"},
+                {english: "tolerant", polish: "tolerancyjny"},
+                {english: "ultimate", polish: "ostateczny"},
+                {english: "variable", polish: "zmienny"},
+                {english: "wealthy", polish: "bogaty"},
+                {english: "yield", polish: "ustępliwy"},
+                {english: "zest", polish: "zapał"},
+                {english: "adapt", polish: "dostosować"},
+                {english: "brave", polish: "odważny"},
+                {english: "clarity", polish: "jasność"},
+                {english: "distinct", polish: "wyraźny"},
+                {english: "emerge", polish: "pojawiać się"},
+                {english: "flourish", polish: "kwitnąć"},
+                {english: "guarantee", polish: "gwarancja"},
+                {english: "honest", polish: "uczciwy"},
+                {english: "intimate", polish: "intymny"},
+                {english: "jubilant", polish: "radosny"},
+                {english: "kinetic", polish: "kinetyczny"},
+                {english: "liberty", polish: "wolność"},
+                {english: "moderate", polish: "umiarkowany"},
+                {english: "nurture", polish: "pielęgnować"},
+                {english: "overcome", polish: "przezwyciężyć"},
+                {english: "precise", polish: "dokładny"},
+                {english: "radiant", polish: "promienny"},
+                {english: "spontaneous", polish: "spontaniczny"},
+                {english: "theory", polish: "teoria"},
+                {english: "unique", polish: "unikalny"},
+                {english: "vision", polish: "wizja"},
+                {english: "worthy", polish: "godny"},
+                {english: "zeal", polish: "zapał"},
+                {english: "analyze", polish: "analizować"},
+                {english: "biased", polish: "stronniczy"},
+                {english: "conclude", polish: "wyciągnąć wnioski"},
+                {english: "different", polish: "inny"},
+                {english: "excite", polish: "podniecać"},
+                {english: "foster", polish: "pielęgnować"},
+                {english: "generate", polish: "generować"}
+            ],
+            hard: [
+                {english: "abundant", polish: "obfity"},
+                {english: "benevolent", polish: "dobroduszny"},
+                {english: "capricious", polish: "kapryśny"},
+                {english: "deference", polish: "szacunek"},
+                {english: "eloquent", polish: "wymowny"},
+                {english: "facetious", polish: "dowcipny"},
+                {english: "gregarious", polish: "towarzyski"},
+                {english: "harbinger", polish: "zwiastun"},
+                {english: "implicit", polish: "niejawny"},
+                {english: "juxtapose", polish: "stawiać obok siebie"},
+                {english: "kinetic", polish: "kinetyczny"},
+                {english: "lethargic", polish: "letargiczny"},
+                {english: "meticulous", polish: "drobiazgowy"},
+                {english: "nefarious", polish: "nikczemny"},
+                {english: "obfuscate", polish: "zaciemniać"},
+                {english: "pragmatic", polish: "pragmatyczny"},
+                {english: "quintessential", polish: "typowy"},
+                {english: "reclusive", polish: "odizolowany"},
+                {english: "serendipity", polish: "szczęśliwy zbieg okoliczności"},
+                {english: "transient", polish: "przemijający"},
+                {english: "ubiquitous", polish: "wszechobecny"},
+                {english: "vexation", polish: "rozdrażnienie"},
+                {english: "warrant", polish: "uzasadniać"},
+                {english: "xenophobic", polish: "ksenofobiczny"},
+                {english: "yoke", polish: "jarzmo"},
+                {english: "zephyr", polish: "wiałek"},
+                {english: "abstruse", polish: "niezrozumiały"},
+                {english: "camaraderie", polish: "przyjaźń"},
+                {english: "dichotomy", polish: "dychotomia"},
+                {english: "enervate", polish: "osłabiać"},
+                {english: "fastidious", polish: "wybredny"},
+                {english: "garrulous", polish: "gadatliwy"},
+                {english: "hubris", polish: "pycha"},
+                {english: "incongruous", polish: "niezgodny"},
+                {english: "juxtaposition", polish: "zestawienie"},
+                {english: "kaleidoscope", polish: "kalejdoskop"},
+                {english: "loquacious", polish: "gadatliwy"},
+                {english: "myriad", polish: "mnogość"},
+                {english: "nonchalant", polish: "obojętny"},
+                {english: "ostracize", polish: "wykluczać"},
+                {english: "paradigm", polish: "paradygmat"},
+                {english: "quagmire", polish: "bagno"},
+                {english: "resilient", polish: "odporny"},
+                {english: "sanguine", polish: "optymistyczny"},
+                {english: "taciturn", polish: "małomówny"},
+                {english: "ubiquitous", polish: "wszechobecny"},
+                {english: "venerable", polish: "czcigodny"},
+                {english: "wanton", polish: "bezwstydny"},
+                {english: "xenial", polish: "gościnny"},
+                {english: "yoke", polish: "jarzmo"},
+                {english: "zealous", polish: "gorliwy"},
+                {english: "aberration", polish: "odchylenie"},
+                {english: "belligerent", polish: "wojowniczy"},
+                {english: "cogent", polish: "przekonujący"},
+                {english: "dormant", polish: "uśpiony"},
+                {english: "eccentric", polish: "ekstrawagancki"},
+                {english: "flabbergasted", polish: "oszołomiony"},
+                {english: "genuine", polish: "autentyczny"},
+                {english: "harangue", polish: "przemowa"},
+                {english: "impetuous", polish: "impulsywny"},
+                {english: "jubilant", polish: "radosny"},
+                {english: "knack", polish: "talent"},
+                {english: "laudable", polish: "chwalebny"},
+                {english: "mendacious", polish: "kłamliwy"},
+                {english: "noxious", polish: "szkodliwy"},
+                {english: "oblivious", polish: "nieświadomy"},
+                {english: "plausible", polish: "wiarygodny"},
+                {english: "quintessential", polish: "typowy"},
+                {english: "recalcitrant", polish: "oporny"},
+                {english: "sublime", polish: "wzniosły"},
+                {english: "tenacious", polish: "uparty"},
+                {english: "unscrupulous", polish: "bez skrupułów"},
+                {english: "vicarious", polish: "zastępczy"},
+                {english: "warrant", polish: "uzasadniać"},
+                {english: "xenogenesis", polish: "obca genetyka"},
+                {english: "yoke", polish: "jarzmo"},
+                {english: "zephyr", polish: "wiałek"}
+            ]
+        };
+
+        let currentLevel = '';
+        let currentLesson = 0;
+        let words = [];
+        let answeredWords = {};
+
+        function populateLessons(level) {
+            const lessons = Array.from({ length: 7 }, (_, i) => `Lekcja ${i + 1}`);
+            const daySelect = document.getElementById('daySelect');
+            daySelect.innerHTML = '<option value="">-- Wybierz lekcję --</option>';
+            lessons.forEach((lesson, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = lesson;
+                daySelect.appendChild(option);
+            });
+        }
+
+        function startLesson() {
+            if (!currentLevel || currentLesson === undefined) return;
+            words = flashcards[currentLevel].slice(currentLesson * 14, (currentLesson + 1) * 14);
+            document.getElementById('wordBox').textContent = words.length ? words[0].english : 'Brak słów';
+            document.getElementById('result').textContent = '';
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('userInput').value.trim().toLowerCase();
+            const currentWord = words[0];
+            if (input === currentWord.polish.toLowerCase()) {
+                document.getElementById('result').textContent = 'Dobrze!';
+                document.getElementById('result').className = 'green';
+                document.getElementById('correctAnswersList').querySelector('tbody').innerHTML += `<tr><td>${currentWord.english}</td><td>${currentWord.polish}</td></tr>`;
+                answeredWords[currentWord.english] = currentWord.polish;
+                words.shift();
+                if (words.length === 0) {
+                    document.getElementById('result').textContent = 'Ukończyłeś cały poziom!';
+                    document.getElementById('result').className = 'green';
+                    return;
+                }
+                document.getElementById('wordBox').textContent = words.length ? words[0].english : 'Brak słów';
+            } else {
+                document.getElementById('result').textContent = 'Źle, spróbuj jeszcze raz';
+                document.getElementById('result').className = 'red';
+            }
+            document.getElementById('userInput').value = '';
+        }
+
+        function giveHint() {
+            const currentWord = words[0];
+            document.getElementById('result').textContent = `Odpowiedź: ${currentWord.polish}`;
+            document.getElementById('result').className = 'red';
+        }
+
+        function handleLevelChange() {
+            currentLevel = document.getElementById('levelSelect').value;
+            populateLessons(currentLevel);
+            document.getElementById('daySelect').disabled = !currentLevel;
+            if (!currentLevel) {
+                document.getElementById('wordBox').textContent = 'Wybierz poziom i lekcję';
+            }
+        }
+
+        function handleLessonChange() {
+            currentLesson = parseInt(document.getElementById('daySelect').value, 10);
+            startLesson();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+
+        document.getElementById('levelSelect').addEventListener('change', handleLevelChange);
+        document.getElementById('daySelect').addEventListener('change', handleLessonChange);
+        document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+        document.getElementById('dontKnowBtn').addEventListener('click', giveHint);
+        document.getElementById('userInput').addEventListener('keypress', handleKeyPress);
+    </script>
+</body>
+</html>
